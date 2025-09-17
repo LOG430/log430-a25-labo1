@@ -1,5 +1,5 @@
 """
-User controller
+Product controller
 SPDX - License - Identifier: LGPL - 3.0 - or -later
 Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
 """
@@ -7,19 +7,19 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from daos.user_dao import UserDAO
+from daos.product_dao import ProductDAO
 
-class UserController:
+class ProductController:
     def __init__(self):
-        self.dao = UserDAO()
+        self.dao = ProductDAO()
 
-    def list_users(self):
-        """ List all users """
+    def list_products(self):
+        """ List all products """
         return self.dao.select_all()
-        
-    def create_user(self, user):
-        """ Create a new user based on user inputs """
-        self.dao.insert(user)
+
+    def create_product(self, product):
+        """ Create a new product based on product inputs """
+        self.dao.insert(product)
 
     def shutdown(self):
         """ Close database connection """

@@ -4,16 +4,19 @@ SPDX - License - Identifier: LGPL - 3.0 - or -later
 Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
 """
 import os
-from dotenv import load_dotenv
+import sys
+from dotenv import find_dotenv, load_dotenv
 import mysql.connector
+
+# Add the src directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models.user import User
 
 class UserDAO:
     def __init__(self):
         try:
-            env_path = "../.env"
-            print(os.path.abspath(env_path))
-            load_dotenv(dotenv_path=env_path)
+            env_file = find_dotenv()
+            load_dotenv(env_file)
             db_host = os.getenv("MYSQL_HOST")
             db_name = os.getenv("MYSQL_DB_NAME")
             db_user = os.getenv("DB_USERNAME")
@@ -42,11 +45,19 @@ class UserDAO:
 
     def update(self, user):
         """ Update given user in MySQL """
-        pass
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE users SET name = %s, email = %s WHERE id = %s",
+                (user.name, user.email, user.id)
+            )
+            self.conn.commit()
+            
 
     def delete(self, user_id):
         """ Delete user from MySQL with given user ID """
-        pass
+        with self.conn.cursor() as cursor:
+            cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+            self.conn.commit()
 
     def delete_all(self): #optional
         """ Empty users table in MySQL """
