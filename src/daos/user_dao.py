@@ -61,7 +61,9 @@ class UserDAO:
 
     def delete_all(self): #optional
         """ Empty users table in MySQL """
-        pass
+        with self.conn.cursor() as cursor:
+            cursor.execute("DELETE FROM users")
+            self.conn.commit()
         
     def close(self):
         self.cursor.close()

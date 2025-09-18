@@ -21,6 +21,10 @@ class ProductController:
         """ Create a new product based on product inputs """
         self.dao.insert(product)
 
+    def delete_product(self, product_id):
+        """ Delete a product by ID """
+        self.dao.delete(product_id)
+
     def shutdown(self):
         """ Close database connection """
         self.dao.close()

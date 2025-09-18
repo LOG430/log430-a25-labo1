@@ -45,3 +45,9 @@ class ProductView:
         brand = input("Marque du produit : ").strip()
         price = float(input("Prix du produit : ").strip())
         return name, brand, price
+
+    @staticmethod
+    def get_product_id():
+        """ Prompt user for product ID """
+        product_id = int(input("ID du produit à supprimer : ").strip())
+        return product_id
