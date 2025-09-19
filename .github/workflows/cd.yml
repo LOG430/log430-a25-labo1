@@ -11,16 +11,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      # Sync only what you need
-      - name: Copy to deployment location
-        run: |
-          sudo mkdir -p /opt/store-manager
-          sudo rsync -av --delete src/ /opt/store-manager/
-          sudo rsync -av requirements.txt /opt/store-manager/
-          sudo rsync -av db-init/ /opt/store-manager/db-init/
-          sudo chown -R gha-runner:gha-runner /opt/store-manager
-
+      
       # Install deps into a persistent venv
       - name: Install dependencies
         run: |
