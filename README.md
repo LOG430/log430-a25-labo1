@@ -3,7 +3,7 @@
 ÉTS - LOG430 - Architecture logicielle - Chargé de laboratoire: Gabriel C. Ullmann, Automne 2025.    
 
 ## 🎯 Objectifs d’apprentissage
-
+Thanh-Huy Nguyen
 - Apprendre à créer une application **client-serveur** simple.
 - Comprendre et mettre en œuvre la structure **MVC avec DAO** pour bien séparer les responsabilités.
 - Comprendre les avantages et les inconvénients des bases de données relationnelles (ex. MySQL) par rapport aux bases « NoSQL » ou orientées à documents (ex. MongoDB).
