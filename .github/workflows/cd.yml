@@ -1,4 +1,3 @@
-# .github/workflows/cd.yml
 name: Simple Deploy
 on:
   push:
@@ -8,45 +7,34 @@ on:
 jobs:
   deploy:
     runs-on: [self-hosted, vm-lab]
-
     steps:
       - uses: actions/checkout@v4
-      
-      # Install deps into a persistent venv
-      - name: Install dependencies
+
+      - name: Prepare deploy dir
         run: |
-          python3 -m venv /opt/store-manager/venv
-          /opt/store-manager/venv/bin/pip install --upgrade pip wheel
-          if [ -f /opt/store-manager/requirements.txt ]; then
-            /opt/store-manager/venv/bin/pip install -r /opt/store-manager/requirements.txt
+          mkdir -p /home/gha-runner/store-manager
+          rsync -av --delete ./ /home/gha-runner/store-manager/
+
+      - name: Python venv + deps
+        run: |
+          python3 -m venv /home/gha-runner/store-manager/venv
+          /home/gha-runner/store-manager/venv/bin/pip install --upgrade pip wheel
+          if [ -f /home/gha-runner/store-manager/requirements.txt ]; then
+            /home/gha-runner/store-manager/venv/bin/pip install -r /home/gha-runner/store-manager/requirements.txt
           fi
 
-      # Create environment config for deployment
-      - name: Setup environment
+      - name: Write .env (example; replace with secrets)
         run: |
-          cat > /opt/store-manager/.env <<'EOF'
+          cat > /home/gha-runner/store-manager/.env <<'EOF'
           MYSQL_HOST=localhost
           MONGODB_HOST=localhost
           MYSQL_DB_NAME=mydb
           DB_USERNAME=user
           DB_PASSWORD=pass
           EOF
-          chmod 600 /opt/store-manager/.env
+          chmod 600 /home/gha-runner/store-manager/.env
 
-      # Create a simple runner script for the deployment
-      - name: Create runner script
+      - name: Restart service
         run: |
-          cat > /opt/store-manager/run.sh <<'EOF'
-          #!/bin/bash
-          cd /opt/store-manager
-          source venv/bin/activate
-          python store_manager.py
-          EOF
-          chmod +x /opt/store-manager/run.sh
-
-      # Test that the deployment works
-      - name: Smoke test deployment
-        run: |
-          cd /opt/store-manager
-          source venv/bin/activate
-          timeout 10s python store_manager.py || echo "App started successfully"
+          sudo systemctl restart store-manager.service
+          sudo systemctl --no-pager --full status store-manager.service || true
