@@ -33,8 +33,3 @@ jobs:
           DB_PASSWORD=pass
           EOF
           chmod 600 /home/gha-runner/store-manager/.env
-
-      - name: Restart service
-        run: |
-          sudo systemctl restart store-manager.service
-          sudo systemctl --no-pager --full status store-manager.service || true
