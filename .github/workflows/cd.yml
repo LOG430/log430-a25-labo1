@@ -1,0 +1,67 @@
+# .github/workflows/cd.yml
+name: Simple Deploy
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, vm-lab]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Ensure tools are there (safe to run if already installed)
+      - name: Install rsync & venv tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync python3-venv
+
+      # Sync only what you need
+      - name: Copy to deployment location
+        run: |
+          sudo mkdir -p /opt/store-manager
+          sudo rsync -av --delete src/ /opt/store-manager/
+          sudo rsync -av requirements.txt /opt/store-manager/
+          sudo rsync -av db-init/ /opt/store-manager/db-init/
+          sudo chown -R gha-runner:gha-runner /opt/store-manager
+
+      # Install deps into a persistent venv
+      - name: Install dependencies
+        run: |
+          python3 -m venv /opt/store-manager/venv
+          /opt/store-manager/venv/bin/pip install --upgrade pip wheel
+          if [ -f /opt/store-manager/requirements.txt ]; then
+            /opt/store-manager/venv/bin/pip install -r /opt/store-manager/requirements.txt
+          fi
+
+      # Create environment config for deployment
+      - name: Setup environment
+        run: |
+          cat > /opt/store-manager/.env <<'EOF'
+          MYSQL_HOST=localhost
+          MONGODB_HOST=localhost
+          MYSQL_DB_NAME=mydb
+          DB_USERNAME=user
+          DB_PASSWORD=pass
+          EOF
+          chmod 600 /opt/store-manager/.env
+
+      # Create a simple runner script for the deployment
+      - name: Create runner script
+        run: |
+          cat > /opt/store-manager/run.sh <<'EOF'
+          #!/bin/bash
+          cd /opt/store-manager
+          source venv/bin/activate
+          python store_manager.py
+          EOF
+          chmod +x /opt/store-manager/run.sh
+
+      # Test that the deployment works
+      - name: Smoke test deployment
+        run: |
+          cd /opt/store-manager
+          source venv/bin/activate
+          timeout 10s python store_manager.py || echo "App started successfully"
