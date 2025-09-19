@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     # 👇 target your org self-hosted runner
-    runs-on: [self-hosted, linux, vm-lab]
+    runs-on: [self-hosted, vm-lab]
 
     # 👇 run steps inside a container so we can apt-get tools as root
     container:
